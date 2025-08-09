@@ -1,4 +1,3 @@
-
 """
 Lightweight automated hyperparameter tuning for XGBoost classifiers.
 
@@ -10,7 +9,10 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import average_precision_score
 import xgboost as xgb
-from . ..utils.metrics import find_best_threshold_youden, evaluate_at_threshold
+
+# Fixed absolute import
+from src.utils.metrics import find_best_threshold_youden, evaluate_at_threshold
+
 
 def random_search_xgb(
     X, y,
@@ -75,6 +77,7 @@ def random_search_xgb(
         thr = find_best_threshold_youden(y_val, scores)
 
         if maximize == "ap":
+            from sklearn.metrics import average_precision_score
             metric = average_precision_score(y_val, scores)
         else:
             metric = evaluate_at_threshold(y_val, scores, thr)["f1"]
