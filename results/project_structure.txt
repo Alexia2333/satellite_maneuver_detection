@@ -65,6 +65,15 @@ Project structure for: satellite_maneuver_detection
     📋 results.json (93.5 KB)
     📄 summary_report.txt (1.3 KB)
   📁 CryoSat-2_20250810_120630_XGB/
+  📁 CryoSat-2_20250810_120854_XGB/
+    🖼️ curves.png (99.0 KB)
+    🖼️ detection_plot.png (506.8 KB)
+    📄 detections.csv (184.1 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (1684.4 KB)
+    📋 results.json (95.7 KB)
+    📄 summary_report.txt (1.3 KB)
   📁 Fengyun-2D_20250810_114523_XGB/
     🖼️ curves.png (96.6 KB)
     🖼️ detection_plot.png (302.1 KB)
@@ -84,6 +93,15 @@ Project structure for: satellite_maneuver_detection
     📋 model.json (2.3 KB)
     📋 model_model.json (308.1 KB)
     📋 results.json (25.1 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 Fengyun-2D_20250810_121058_XGB/
+    🖼️ curves.png (94.8 KB)
+    🖼️ detection_plot.png (298.6 KB)
+    📄 detections.csv (51.2 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (481.0 KB)
+    📋 results.json (24.8 KB)
     📄 summary_report.txt (1.3 KB)
   📁 Fengyun-4A_20250809_144003/
     📋 config_used.json (1.7 KB)
@@ -123,6 +141,25 @@ Project structure for: satellite_maneuver_detection
     📋 model_model.json (1080.9 KB)
     📋 results.json (30.8 KB)
     📄 summary_report.txt (1.3 KB)
+  📁 Fengyun-4A_20250810_170211/
+  📁 Fengyun-4A_20250810_170424/
+  📁 Fengyun-4A_20250810_170600/
+  📁 Fengyun-4A_20250810_170740/
+    🖼️ Fengyun-4A_mean_motion_detection_results.png (381.5 KB)
+    📄 detection_results.csv (8.1 KB)
+    📋 report.json (0.2 KB)
+  📁 Fengyun-4A_ARIMA_20250810_164847/
+  📁 Fengyun-4A_ARIMA_Drift_20250810_143650/
+    🖼️ Fengyun-4A_mean_motion_drift_detection_plot.png (533.9 KB)
+    📄 detection_results.csv (42.5 KB)
+    📋 summary_report.json (0.2 KB)
+  📁 Fengyun-4A_ARIMA_mean_motion_20250810_150552/
+    🖼️ Fengyun-4A_mean_motion_detection_plot.png (198.9 KB)
+    📄 detection_results.csv (19.9 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Fengyun-4A_Hybrid_20250810_150733/
+  📁 Fengyun-4A_Hybrid_20250810_150906/
+  📁 Fengyun-4A_Hybrid_20250810_151115/
   📁 Fengyun-4A_combined_20250810_111523/
     🖼️ detection_plot.png (325.5 KB)
     📄 detections.csv (56.1 KB)
@@ -143,6 +180,70 @@ Project structure for: satellite_maneuver_detection
     🖼️ detection_plot.png (324.9 KB)
     📄 detections.csv (56.1 KB)
     📋 evaluation.json (2.1 KB)
+  📁 Jason-1_20250810_141036_ARIMA/
+    🖼️ Jason-1_mean_motion_detection_plot.png (199.9 KB)
+    📄 detection_results.csv (119.9 KB)
+    📋 summary_report.json (0.2 KB)
+  📁 Jason-1_20250810_170935/
+    🖼️ Jason-1_mean_motion_detection_results.png (317.2 KB)
+    📄 detection_results.csv (8.0 KB)
+    📋 report.json (0.2 KB)
+  📁 Jason-1_20250810_183821_ARIMA/
+    🖼️ Jason-1_detection_plot.png (28.4 KB)
+    📋 anomaly_times.json (0.1 KB)
+    📄 detection_results.csv (101.5 KB)
+    📋 summary_report.json (0.1 KB)
+  📁 Jason-1_20250810_184353_ARIMA/
+    🖼️ Jason-1_detection_plot.png (36.2 KB)
+    📋 anomaly_times.json (0.1 KB)
+    📄 detection_results.csv (101.8 KB)
+    📋 summary_report.json (0.1 KB)
+  📁 Jason-1_20250810_185245_ARIMA/
+    🖼️ detection_plot.png (53.8 KB)
+    📄 detections.csv (101.8 KB)
+    📋 results.json (0.8 KB)
+    📄 summary_report.txt (0.8 KB)
+  📁 Jason-1_ARIMA_20250810_171144/
+  📁 Jason-1_ARIMA_20250810_171646/
+    🖼️ Jason-1_mean_motion_detection_results.png (218.5 KB)
+    📄 detection_results.csv (57.9 KB)
+    📋 report.json (0.2 KB)
+  📁 Jason-1_ARIMA_20250810_172230/
+  📁 Jason-1_ARIMA_20250810_172334/
+    🖼️ Jason-1_mean_motion_detection_results.png (186.8 KB)
+    📄 detection_results.csv (71.8 KB)
+    📋 report.json (0.2 KB)
+  📁 Jason-1_ARIMA_20250810_172859/
+  📁 Jason-1_ARIMA_20250810_173340/
+    🖼️ Jason-1_mean_motion_detection_results.png (191.1 KB)
+    📄 detection_results.csv (71.8 KB)
+    📋 report.json (0.2 KB)
+  📁 Jason-1_ARIMA_Drift_20250810_143407/
+    🖼️ Jason-1_mean_motion_drift_detection_plot.png (196.6 KB)
+    📄 detection_results.csv (128.9 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-1_ARIMA_Drift_20250810_143848/
+    🖼️ Jason-1_mean_motion_drift_detection_plot.png (196.6 KB)
+    📄 detection_results.csv (128.9 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-1_ARIMA_mean_motion_20250810_141506/
+  📁 Jason-1_ARIMA_mean_motion_20250810_141815/
+  📁 Jason-1_ARIMA_mean_motion_20250810_142054/
+    🖼️ Jason-1_mean_motion_detection_plot.png (182.7 KB)
+    📄 detection_results.csv (120.8 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-1_ARIMA_mean_motion_20250810_143050/
+    🖼️ Jason-1_mean_motion_detection_plot.png (182.0 KB)
+    📄 detection_results.csv (120.8 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-1_ARIMA_mean_motion_20250810_145602/
+    🖼️ Jason-1_mean_motion_detection_plot.png (170.5 KB)
+    📄 detection_results.csv (59.8 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-1_SARIMA_mean_motion_20250810_142452/
+    🖼️ Jason-1_mean_motion_detection_plot.png (191.6 KB)
+    📄 detection_results.csv (119.8 KB)
+    📋 summary_report.json (0.3 KB)
   📁 Jason-2_20250810_114938_XGB/
     🖼️ curves.png (103.4 KB)
     🖼️ detection_plot.png (436.7 KB)
@@ -172,6 +273,80 @@ Project structure for: satellite_maneuver_detection
     📋 model_model.json (695.7 KB)
     📋 results.json (76.5 KB)
     📄 summary_report.txt (1.3 KB)
+  📁 Jason-2_20250810_140931_ARIMA/
+    🖼️ Jason-2_mean_motion_detection_plot.png (214.4 KB)
+    📄 detection_results.csv (117.3 KB)
+    📋 summary_report.json (0.2 KB)
+  📁 Jason-2_20250810_151332_XGB/
+    🖼️ curves.png (103.4 KB)
+    🖼️ detection_plot.png (436.7 KB)
+    📄 detections.csv (167.9 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (695.7 KB)
+    📋 results.json (76.5 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 Jason-2_ARIMA_Drift_20250810_143943/
+    🖼️ Jason-2_mean_motion_drift_detection_plot.png (223.2 KB)
+    📄 detection_results.csv (125.2 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-2_ARIMA_Drift_20250810_144435/
+    🖼️ Jason-2_mean_motion_drift_detection_plot.png (223.4 KB)
+    📄 detection_results.csv (126.3 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-2_ARIMA_mean_motion_20250810_144630/
+    🖼️ Jason-2_mean_motion_detection_plot.png (203.0 KB)
+    📄 detection_results.csv (118.1 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-2_ARIMA_mean_motion_20250810_145021/
+    🖼️ Jason-2_mean_motion_detection_plot.png (178.6 KB)
+    📄 detection_results.csv (78.9 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-2_ARIMA_mean_motion_20250810_145338/
+    🖼️ Jason-2_mean_motion_detection_plot.png (151.5 KB)
+    📄 detection_results.csv (39.9 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-2_ARIMA_mean_motion_20250810_150040/
+    🖼️ Jason-2_mean_motion_detection_plot.png (177.7 KB)
+    📄 detection_results.csv (78.9 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-2_ARIMA_mean_motion_20250810_150340/
+    🖼️ Jason-2_mean_motion_detection_plot.png (126.3 KB)
+    📄 detection_results.csv (32.5 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-2_Hybrid_20250810_151154/
+  📁 Jason-3_20250810_140919_ARIMA/
+    🖼️ Jason-3_mean_motion_detection_plot.png (187.0 KB)
+    📄 detection_results.csv (70.5 KB)
+    📋 summary_report.json (0.2 KB)
+  📁 Jason-3_ARIMA_mean_motion_20250810_140734/
+  📁 Jason-3_ARIMA_mean_motion_20250810_144820/
+    🖼️ Jason-3_mean_motion_detection_plot.png (161.2 KB)
+    📄 detection_results.csv (70.2 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-3_ARIMA_mean_motion_20250810_144951/
+    🖼️ Jason-3_mean_motion_detection_plot.png (151.6 KB)
+    📄 detection_results.csv (46.8 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-3_ARIMA_mean_motion_20250810_145453/
+    🖼️ Jason-3_mean_motion_detection_plot.png (171.7 KB)
+    📄 detection_results.csv (17.3 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-3_ARIMA_mean_motion_20250810_145733/
+    🖼️ Jason-3_mean_motion_drift_detection_plot.png (167.3 KB)
+    📄 detection_results.csv (49.6 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-3_ARIMA_mean_motion_20250810_150008/
+    🖼️ Jason-3_mean_motion_detection_plot.png (151.0 KB)
+    📄 detection_results.csv (46.8 KB)
+    📋 summary_report.json (0.3 KB)
+  📁 Jason-3_AdvancedARIMA_20250810_134557/
+    🖼️ Jason-3_mean_motion_detection_plot.png (168.6 KB)
+    📄 detection_results.csv (70.5 KB)
+  📁 Jason-3_AdvancedARIMA_20250810_134716/
+    🖼️ Jason-3_mean_motion_detection_plot.png (167.7 KB)
+    📄 detection_results.csv (70.2 KB)
+  📁 Jason-3_AdvancedARIMA_20250810_134746/
   📁 SARAL_20250810_115840_XGB/
   📁 Sentinel-3B_20250810_114550_XGB/
   📁 Sentinel-3B_20250810_114832_XGB/
@@ -194,15 +369,20 @@ Project structure for: satellite_maneuver_detection
     📋 results.json (32.9 KB)
     📄 summary_report.txt (1.3 KB)
 📁 results/
-  📄 project_structure.txt (0.0 KB)
+  📄 project_structure.txt (8.0 KB)
 📁 scripts/
   🐍 aggressive_detection.py (18.3 KB)
   🐍 debug_detection.py (12.4 KB)
+  🐍 diagnostic_script.py (10.0 KB)
   🐍 display_structure.py (2.8 KB)
+  🐍 enhanced_arima_detector.py (19.9 KB)
   🐍 final_xgb_detector.py (23.4 KB)
   🐍 fixed_detection.py (14.4 KB)
+  🐍 run_arima_detector.py (19.0 KB)
   🐍 run_enhanced_detection.py (9.8 KB)
+  🐍 run_hybrid_detector.py (5.4 KB)
   🐍 run_maneuver_detection.py (14.0 KB)
+  🐍 run_realtime_arima.py (2.3 KB)
   🐍 test_autotune.py (13.4 KB)
 📁 src/
   📁 data/
@@ -220,30 +400,23 @@ Project structure for: satellite_maneuver_detection
     🐍 base_features.py (2.7 KB)
     🐍 drift_features.py (3.2 KB)
   📁 models/
-    📁 scripts_to_sort/
-      🐍 enhanced_xgboost_detector.py (10.6 KB)
-      🐍 enhanced_xgboost_task.py (15.5 KB)
-      🐍 fy4a_unsupervised_detection.py (20.7 KB)
-      🐍 hybrid_system.py (0.0 KB)
-      🐍 improved_fy4a_detector.py (10.6 KB)
-      🐍 improved_fy4a_task.py (31.7 KB)
-      🐍 improved_xgboost_task.py (20.5 KB)
-      🐍 integrated_kfold_task.py (5.7 KB)
-      🐍 test_particle_filter_performance.py (21.7 KB)
-      🐍 test_particle_filter_supervised.py (21.8 KB)
     🐍 __init__.py (0.0 KB)
+    🐍 arima_detector.py (10.9 KB)
     🐍 cascade_detector.py (0.0 KB)
     🐍 compare_supervised_unsupervised.py (18.2 KB)
     🐍 debug_detector.py (3.0 KB)
     🐍 drift_aware_detector.py (3.7 KB)
     🐍 enhanced_xgb_detector.py (18.5 KB)
     🐍 maneuver_xgb_detector.py (12.0 KB)
+    🐍 realtime_arima_detector.py (2.7 KB)
     🐍 refactored_detector.py (9.8 KB)
     🐍 test_particle_filter_supervised.py (21.8 KB)
     🐍 visualize_data.py (3.6 KB)
     🐍 xgboost_detector.py (10.6 KB)
   📁 tuning/
     🐍 auto_tune.py (2.2 KB)
+    🐍 auto_tune_arima.py (1.8 KB)
+    🐍 tune_arima_threshold.py (8.3 KB)
   📁 utils/
     📁 models/
       📁 hybrid/
@@ -252,7 +425,7 @@ Project structure for: satellite_maneuver_detection
     🐍 __init__.py (0.0 KB)
     🐍 feature_engineer.py (22.2 KB)
     🐍 loader.py (10.3 KB)
-    🐍 metrics.py (2.6 KB)
+    🐍 metrics.py (5.6 KB)
     🐍 orbit_classification.py (1.7 KB)
   📁 visualization/
     🐍 __init__.py (0.0 KB)
@@ -260,7 +433,5 @@ Project structure for: satellite_maneuver_detection
 📄 .gitignore (0.1 KB)
 📄 README.md (0.0 KB)
 📄 README_NEW_PIPELINE.md (1.2 KB)
-📋 autotune_test_Fengyun-4A_20250810_112824.json (0.5 KB)
-📋 autotune_test_Fengyun-4A_20250810_112901.json (0.5 KB)
 🖼️ debug_analysis.png (192.9 KB)
 📄 requirements.txt (0.0 KB)
