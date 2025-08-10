@@ -25,28 +25,6 @@ def random_search_xgb(
 ) -> Tuple[dict, float, float]:
     """
     Random search over XGBClassifier hyperparameters.
-
-    Parameters
-    ----------
-    X, y : array-like
-        Training features and labels.
-    param_grid : Dict[str, List]
-        Candidate values for each hyperparameter.
-    n_iter : int
-        Number of random samples from the grid.
-    test_size : float
-        Validation split fraction.
-    early_stopping_rounds : int
-        Early stopping rounds passed to XGBoost.
-    random_state : int
-        RNG seed for reproducibility.
-    maximize : str
-        Metric to maximize: "f1" or "ap".
-
-    Returns
-    -------
-    Tuple[dict, float, float]
-        (best_params, best_metric, best_threshold)
     """
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=test_size, random_state=random_state, stratify=y
@@ -60,19 +38,26 @@ def random_search_xgb(
 
     for _ in range(n_iter):
         params = {k: rng.choice(param_grid[k]) for k in keys}
+        
+        if 'eval_metric' not in params:
+            params['eval_metric'] = 'aucpr'
+
         clf = xgb.XGBClassifier(
             tree_method="hist",
             enable_categorical=False,
             objective="binary:logistic",
+            early_stopping_rounds=early_stopping_rounds, 
             **params
         )
+
+
         clf.fit(
-            X_train, y_train,
+            X_train, 
+            y_train,
             eval_set=[(X_val, y_val)],
-            eval_metric="aucpr",
             verbose=False,
-            early_stopping_rounds=early_stopping_rounds
         )
+        
         scores = clf.predict_proba(X_val)[:, 1]
         thr = find_best_threshold_youden(y_val, scores)
 

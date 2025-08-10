@@ -1,0 +1,24 @@
+{
+  "satellite": "Fengyun-4A",
+  "timestamp": "20250810_112901",
+  "data_stats": {
+    "n_samples": 1305,
+    "n_features": 107,
+    "n_positive": 157,
+    "n_maneuvers": 49
+  },
+  "best_params": {
+    "max_depth": "6",
+    "learning_rate": 0.05,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_alpha": 0.1,
+    "reg_lambda": 2.0,
+    "n_estimators": "400",
+    "min_child_weight": "2",
+    "scale_pos_weight": "10",
+    "eval_metric": "aucpr"
+  },
+  "best_metric": 0.75,
+  "best_threshold": 0.7129681706428528
+}

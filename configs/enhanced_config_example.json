@@ -1,0 +1,29 @@
+{
+  "orbit": "GEO",
+  "label_window_days": 2,
+  
+  "detection_strategy": "top_n",
+  "expected_events": 49,
+  "target_recall": 0.8,
+  
+  "min_gap_days": 5.0,
+  "cluster_window_days": 7.0,
+  "top_n_multiplier": 1.2,
+  
+  "peak_window_days": 10,
+  "peak_prominence": 0.3,
+  "outlier_percentile": 90,
+  
+  "scale_pos_weight": 5,
+  "early_stopping_rounds": 30,
+  
+  "sensitive_hyperparams": {
+    "max_depth": 6,
+    "min_child_weight": 1,
+    "reg_alpha": 0.01,
+    "reg_lambda": 0.5
+  },
+  
+  "threshold_mode": "quantile",
+  "threshold_quantile": 0.5
+}

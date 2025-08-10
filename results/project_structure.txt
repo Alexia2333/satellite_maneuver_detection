@@ -1,0 +1,266 @@
+Project Structure Generated on: satellite_maneuver_detection
+
+Project structure for: satellite_maneuver_detection
+==================================================
+📁 configs/
+  📋 Fengyun-4A.json (0.4 KB)
+  📋 enhanced_config_example.json (0.5 KB)
+📁 data/
+  📁 manoeuvres/
+    📄 cs2man.txt (50.6 KB)
+    📄 en1man.txt (57.8 KB)
+    📄 h2aman.txt (15.7 KB)
+    📄 h2cman.txt (3.5 KB)
+    📄 h2dman.txt (2.7 KB)
+    📄 ja1man.txt (50.2 KB)
+    📄 ja2man.txt (41.0 KB)
+    📄 ja3man.txt (15.1 KB)
+    📄 manFY2D.txt.fy (1.8 KB)
+    📄 manFY2E.txt.fy (4.0 KB)
+    📄 manFY2F.txt.fy (5.6 KB)
+    📄 manFY2H.txt.fy (1.0 KB)
+    📄 manFY4A.txt.fy (4.1 KB)
+    📄 manFengyun-2D.txt (1.8 KB)
+    📄 manFengyun-2E.txt (4.0 KB)
+    📄 manFengyun-2E.txt.fy (4.0 KB)
+    📄 manFengyun-2F.txt (5.6 KB)
+    📄 manFengyun-2H.txt (1.0 KB)
+    📄 manFengyun-4A.txt (4.1 KB)
+    📄 s3aman.txt (18.7 KB)
+    📄 s3bman.txt (17.0 KB)
+    📄 s6aman.txt (5.1 KB)
+    📄 sp2man.txt (60.8 KB)
+    📄 sp4man.txt (58.9 KB)
+    📄 sp5man.txt (52.3 KB)
+    📄 srlman.txt (23.2 KB)
+    📄 topman.txt (1.5 KB)
+  📁 orbital_elements/
+    📄 CryoSat-2.csv (555.7 KB)
+    📄 Fengyun-2D.csv (156.3 KB)
+    📄 Fengyun-2E.csv (313.1 KB)
+    📄 Fengyun-2F.csv (393.6 KB)
+    📄 Fengyun-2H.csv (138.8 KB)
+    📄 Fengyun-4A.csv (173.6 KB)
+    📄 Haiyang-2A.csv (387.9 KB)
+    📄 Jason-1.csv (512.2 KB)
+    📄 Jason-2.csv (503.8 KB)
+    📄 Jason-3.csv (309.2 KB)
+    📄 SARAL.csv (424.3 KB)
+    📄 Sentinel-3A.csv (309.3 KB)
+    📄 Sentinel-3B.csv (204.9 KB)
+    📄 Sentinel-6A.csv (85.1 KB)
+    📄 TOPEX.csv (530.2 KB)
+  📁 processed/
+  📄 man.readme (3.0 KB)
+📁 notebooks/
+📁 outputs/
+  📁 CryoSat-2_20250810_115902_XGB/
+  📁 CryoSat-2_20250810_120304_XGB/
+    🖼️ curves.png (98.3 KB)
+    🖼️ detection_plot.png (526.5 KB)
+    📄 detections.csv (182.7 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (1256.2 KB)
+    📋 results.json (93.5 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 CryoSat-2_20250810_120630_XGB/
+  📁 Fengyun-2D_20250810_114523_XGB/
+    🖼️ curves.png (96.6 KB)
+    🖼️ detection_plot.png (302.1 KB)
+    📄 detections.csv (51.2 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (481.5 KB)
+    📋 results.json (24.6 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 Fengyun-2D_20250810_115653_XGB/
+  📁 Fengyun-2D_20250810_115956_XGB/
+  📁 Fengyun-2D_20250810_120127_XGB/
+    🖼️ curves.png (97.1 KB)
+    🖼️ detection_plot.png (304.2 KB)
+    📄 detections.csv (51.3 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (308.1 KB)
+    📋 results.json (25.1 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 Fengyun-4A_20250809_144003/
+    📋 config_used.json (1.7 KB)
+    📄 detections.csv (55.9 KB)
+    📋 metrics.json (2.2 KB)
+    🖼️ pr_curve.png (68.2 KB)
+    🖼️ roc_curve.png (43.5 KB)
+    🖼️ timeline_detections.png (334.1 KB)
+  📁 Fengyun-4A_20250809_144714_fixed/
+    📄 detections.csv (55.9 KB)
+    📋 metrics.json (0.3 KB)
+    🖼️ timeline.png (341.9 KB)
+  📁 Fengyun-4A_20250809_144806_fixed/
+    📄 detections.csv (55.8 KB)
+    📋 metrics.json (0.3 KB)
+    🖼️ timeline.png (340.1 KB)
+  📁 Fengyun-4A_20250809_145113_aggressive/
+    📄 detections.csv (2.3 KB)
+    📋 results.json (2.4 KB)
+    🖼️ results.png (470.3 KB)
+  📁 Fengyun-4A_20250810_113624_XGB/
+  📁 Fengyun-4A_20250810_113905_XGB/
+    🖼️ curves.png (96.4 KB)
+    🖼️ detection_plot.png (378.2 KB)
+    📄 detections.csv (56.0 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (1080.9 KB)
+    📋 results.json (30.8 KB)
+    📄 summary_report.txt (0.7 KB)
+  📁 Fengyun-4A_20250810_114126_XGB/
+    🖼️ curves.png (96.4 KB)
+    🖼️ detection_plot.png (378.2 KB)
+    📄 detections.csv (56.0 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (1080.9 KB)
+    📋 results.json (30.8 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 Fengyun-4A_combined_20250810_111523/
+    🖼️ detection_plot.png (325.5 KB)
+    📄 detections.csv (56.1 KB)
+    📋 evaluation.json (2.0 KB)
+  📁 Fengyun-4A_top_n_20250810_111548/
+    🖼️ detection_plot.png (327.0 KB)
+    📄 detections.csv (56.1 KB)
+    📋 evaluation.json (2.1 KB)
+  📁 Fengyun-4A_top_n_20250810_111607/
+    🖼️ detection_plot.png (324.9 KB)
+    📄 detections.csv (56.1 KB)
+    📋 evaluation.json (2.1 KB)
+  📁 Fengyun-4A_top_n_20250810_111910/
+    🖼️ detection_plot.png (325.8 KB)
+    📄 detections.csv (56.2 KB)
+    📋 evaluation.json (2.1 KB)
+  📁 Fengyun-4A_top_n_20250810_111921/
+    🖼️ detection_plot.png (324.9 KB)
+    📄 detections.csv (56.1 KB)
+    📋 evaluation.json (2.1 KB)
+  📁 Jason-2_20250810_114938_XGB/
+    🖼️ curves.png (103.4 KB)
+    🖼️ detection_plot.png (436.7 KB)
+    📄 detections.csv (167.9 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (695.7 KB)
+    📋 results.json (76.5 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 Jason-2_20250810_115642_XGB/
+  📁 Jason-2_20250810_115708_XGB/
+    🖼️ curves.png (102.1 KB)
+    🖼️ detection_plot.png (445.2 KB)
+    📄 detections.csv (167.9 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (691.1 KB)
+    📋 results.json (75.2 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 Jason-2_20250810_115951_XGB/
+  📁 Jason-2_20250810_120148_XGB/
+    🖼️ curves.png (103.4 KB)
+    🖼️ detection_plot.png (436.7 KB)
+    📄 detections.csv (167.9 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (695.7 KB)
+    📋 results.json (76.5 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 SARAL_20250810_115840_XGB/
+  📁 Sentinel-3B_20250810_114550_XGB/
+  📁 Sentinel-3B_20250810_114832_XGB/
+    🖼️ curves.png (99.8 KB)
+    🖼️ detection_plot.png (160.6 KB)
+    📄 detections.csv (68.0 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (165.3 KB)
+    📋 results.json (3.5 KB)
+    📄 summary_report.txt (1.3 KB)
+  📁 Sentinel-3B_20250810_115647_XGB/
+  📁 Sentinel-3B_20250810_120225_XGB/
+    🖼️ curves.png (98.4 KB)
+    🖼️ detection_plot.png (367.3 KB)
+    📄 detections.csv (68.1 KB)
+    📋 feature_names.json (3.1 KB)
+    📋 model.json (2.3 KB)
+    📋 model_model.json (689.9 KB)
+    📋 results.json (32.9 KB)
+    📄 summary_report.txt (1.3 KB)
+📁 results/
+  📄 project_structure.txt (0.0 KB)
+📁 scripts/
+  🐍 aggressive_detection.py (18.3 KB)
+  🐍 debug_detection.py (12.4 KB)
+  🐍 display_structure.py (2.8 KB)
+  🐍 final_xgb_detector.py (23.4 KB)
+  🐍 fixed_detection.py (14.4 KB)
+  🐍 run_enhanced_detection.py (9.8 KB)
+  🐍 run_maneuver_detection.py (14.0 KB)
+  🐍 test_autotune.py (13.4 KB)
+📁 src/
+  📁 data/
+    🐍 __init__.py (0.0 KB)
+    🐍 feature_engineer.py (12.9 KB)
+    🐍 loader.py (6.3 KB)
+    🐍 mean_elements_processor.py (7.1 KB)
+    🐍 preprocessor.py (1.9 KB)
+  📁 evaluation/
+    🐍 __init__.py (0.0 KB)
+    🐍 model_comparison.py (21.0 KB)
+    🐍 reporting.py (2.4 KB)
+    🐍 visualization.py (3.8 KB)
+  📁 features/
+    🐍 base_features.py (2.7 KB)
+    🐍 drift_features.py (3.2 KB)
+  📁 models/
+    📁 scripts_to_sort/
+      🐍 enhanced_xgboost_detector.py (10.6 KB)
+      🐍 enhanced_xgboost_task.py (15.5 KB)
+      🐍 fy4a_unsupervised_detection.py (20.7 KB)
+      🐍 hybrid_system.py (0.0 KB)
+      🐍 improved_fy4a_detector.py (10.6 KB)
+      🐍 improved_fy4a_task.py (31.7 KB)
+      🐍 improved_xgboost_task.py (20.5 KB)
+      🐍 integrated_kfold_task.py (5.7 KB)
+      🐍 test_particle_filter_performance.py (21.7 KB)
+      🐍 test_particle_filter_supervised.py (21.8 KB)
+    🐍 __init__.py (0.0 KB)
+    🐍 cascade_detector.py (0.0 KB)
+    🐍 compare_supervised_unsupervised.py (18.2 KB)
+    🐍 debug_detector.py (3.0 KB)
+    🐍 drift_aware_detector.py (3.7 KB)
+    🐍 enhanced_xgb_detector.py (18.5 KB)
+    🐍 maneuver_xgb_detector.py (12.0 KB)
+    🐍 refactored_detector.py (9.8 KB)
+    🐍 test_particle_filter_supervised.py (21.8 KB)
+    🐍 visualize_data.py (3.6 KB)
+    🐍 xgboost_detector.py (10.6 KB)
+  📁 tuning/
+    🐍 auto_tune.py (2.2 KB)
+  📁 utils/
+    📁 models/
+      📁 hybrid/
+        🐍 __init__.py (0.0 KB)
+      🐍 __init__.py (0.0 KB)
+    🐍 __init__.py (0.0 KB)
+    🐍 feature_engineer.py (22.2 KB)
+    🐍 loader.py (10.3 KB)
+    🐍 metrics.py (2.6 KB)
+    🐍 orbit_classification.py (1.7 KB)
+  📁 visualization/
+    🐍 __init__.py (0.0 KB)
+  🐍 __init__.py (0.0 KB)
+📄 .gitignore (0.1 KB)
+📄 README.md (0.0 KB)
+📄 README_NEW_PIPELINE.md (1.2 KB)
+📋 autotune_test_Fengyun-4A_20250810_112824.json (0.5 KB)
+📋 autotune_test_Fengyun-4A_20250810_112901.json (0.5 KB)
+🖼️ debug_analysis.png (192.9 KB)
+📄 requirements.txt (0.0 KB)

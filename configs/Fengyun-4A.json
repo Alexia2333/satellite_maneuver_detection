@@ -1,0 +1,19 @@
+{
+  "orbit": "GEO",
+  "label_window_days": 2,
+  "threshold": "recall:0.6",
+  "temporal_window": 3,
+  "val_last_n_events": 8,
+  "auto_tune": false,
+  "hyperparams": {
+    "max_depth": 5,
+    "learning_rate": 0.08,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "reg_alpha": 0.05,
+    "reg_lambda": 1.5,
+    "n_estimators": 800,
+    "min_child_weight": 2,
+    "eval_metric": "aucpr"
+  }
+}
