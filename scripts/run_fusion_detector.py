@@ -16,7 +16,6 @@ if str(ROOT) not in sys.path:
 from src.data.loader import SatelliteDataLoader
 from src.models.arima_detector import EnhancedARIMADetector, DetectorConfig
 from src.tuning.auto_tune_arima import find_best_arima_order
-# --- 导入我们新的目标驱动优化器 ---
 from src.tuning.tune_arima_threshold import find_factor_for_target_recall
 from src.utils.metrics import evaluate_detection
 
@@ -40,7 +39,8 @@ def visualize_fusion_results(results_df, maneuvers, title, output_path):
         ax = axes[i]
         ax.plot(results_df.index, results_df[f'actual_{element}'], 'k-', label=f'Actual {element}', linewidth=1)
         if maneuvers:
-            for m in maneuvers: ax.axvline(m, color='green', linestyle=':', alpha=0.6)
+            # Plot maneuver lines
+            maneuver_lines = [ax.axvline(m, color='green', linestyle=':', alpha=0.6) for m in maneuvers]
         detections = results_df[results_df[f'is_anomaly_{element}']]
         ax.scatter(detections.index, detections[f'actual_{element}'], color='orange', marker='o', s=50, label=f'{element} Detection')
         ax.set_ylabel(element.replace('_', ' ').title())
@@ -97,7 +97,6 @@ def main():
         
         val_maneuvers = [m for m in maneuver_times if val_data.index.min() <= m <= val_data.index.max()]
         if val_maneuvers:
-            # --- 使用新的、以召回率为目标的优化器 ---
             best_factor = find_factor_for_target_recall(detector, val_data, val_maneuvers, target_recall=TARGET_RECALL_LEVEL)
             detector.cfg.threshold_factor = best_factor
         else:
@@ -138,6 +137,14 @@ def main():
     plot_path = output_dir / "fusion_detection_plot.png"
     visualize_fusion_results(fusion_df, test_maneuvers, plot_title, plot_path)
     
+    # --- MODIFICATION START ---
+    # Save the full DataFrame used for plotting to a CSV file.
+    # This allows for later re-plotting and detailed analysis without re-running the model.
+    plot_data_path = output_dir / 'fusion_plot_data.csv'
+    fusion_df.to_csv(plot_data_path)
+    print(f"saved plotting data to {plot_data_path}")
+    # --- MODIFICATION END ---
+
     report = {"satellite_name": args.satellite, "fusion_method": "Weighted Fusion", "weights": weights, "performance": metrics, "target_recall_for_tuning": TARGET_RECALL_LEVEL}
     with open(output_dir / 'fusion_summary_report.json', 'w') as f: json.dump(report, f, indent=2, default=str)
     

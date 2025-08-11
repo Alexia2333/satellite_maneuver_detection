@@ -1,89 +1,173 @@
 # src/tuning/tune_arima_threshold.py
-import copy
-import pandas as pd
-import numpy as np
-from typing import List, Dict, Tuple
-from tqdm import tqdm  # <--- 1. 导入tqdm库
+from typing import List, Tuple, Iterable, Optional, Dict
 from datetime import timedelta
+
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 from src.models.arima_detector import EnhancedARIMADetector
 
-def _greedy_event_match(pred_times: List[pd.Timestamp], true_times: List[pd.Timestamp], window: pd.Timedelta) -> Tuple[int, int, int]:
-    """事件匹配的贪心算法，返回 (TP, FP, FN)。"""
-    if not pred_times or not true_times:
-        return 0, len(pred_times), len(true_times)
-    
-    pred_sorted, truth_sorted = sorted(list(set(pred_times))), sorted(list(set(true_times)))
-    used_truth_indices, tp = set(), 0
 
-    for p_time in pred_sorted:
-        for i, t_time in enumerate(truth_sorted):
-            if i not in used_truth_indices and abs(p_time - t_time) <= window:
-                tp += 1
-                used_truth_indices.add(i)
-                break
-    
-    fp = len(pred_sorted) - tp
-    fn = len(truth_sorted) - len(used_truth_indices)
+# ---------- Event-level matching ----------
+def _greedy_event_match(
+    pred_times: List[pd.Timestamp],
+    true_times: List[pd.Timestamp],
+    window: pd.Timedelta,
+) -> Tuple[int, int, int]:
+    """
+    Greedy 1-to-1 event match within +/- window.
+    Returns (TP, FP, FN).
+    """
+    if not pred_times and not true_times:
+        return 0, 0, 0
+    if not pred_times:
+        return 0, 0, len(true_times)
+    if not true_times:
+        return 0, len(pred_times), 0
+
+    preds = sorted(set(pd.to_datetime(pred_times)))
+    trues = sorted(set(pd.to_datetime(true_times)))
+
+    tp = 0
+    i = j = 0
+    while i < len(preds) and j < len(trues):
+        p, t = preds[i], trues[j]
+        if p < t - window:
+            i += 1
+        elif p > t + window:
+            j += 1
+        else:
+            # hit (1-to-1)
+            tp += 1
+            i += 1
+            j += 1
+
+    fp = len(preds) - tp
+    fn = len(trues) - tp
     return tp, fp, fn
 
+
+# ---------- Evaluation with caching ----------
+def _evaluate_metrics(
+    detector: EnhancedARIMADetector,
+    series: pd.Series,
+    true_maneuver_times: List[pd.Timestamp],
+    factor: float,
+    tol_days: int,
+    cache: Dict[float, Tuple[float, float, float]],
+) -> Tuple[float, float, float]:
+    """
+    Evaluate (precision, recall, f1) at a given factor.
+    Uses a small cache to avoid repeated detect() calls.
+    """
+    f = float(factor)
+    if f in cache:
+        return cache[f]
+
+    detector.cfg.threshold_factor = f
+    df = detector.detect(series)
+    pred_times = df.index[df["is_anomaly"]].to_list()
+    tp, fp, fn = _greedy_event_match(pred_times, true_maneuver_times, timedelta(days=tol_days))
+
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
+
+    cache[f] = (precision, recall, f1)
+    return precision, recall, f1
+
+
+# ---------- Main: F1-oriented threshold tuning ----------
+def find_best_threshold_factor(
+    detector_instance: EnhancedARIMADetector,
+    val_data: pd.Series,
+    true_maneuver_times: List[pd.Timestamp],
+    factors_to_test: Optional[Iterable[float]] = None,
+    tol_days: int = 2,
+    coarse_min: float = 0.05,
+    coarse_max: float = 12.0,
+    coarse_num: int = 21,
+    refine_rounds: int = 2,
+) -> float:
+    """
+    F1-driven threshold tuning:
+      1) Coarse search on a log-spaced grid
+      2) Local refinement around the best coarse factor (log-domain neighborhood)
+
+    Notes:
+      - No deepcopy: we reuse the fitted detector and only change threshold_factor.
+      - Cached evaluations to reduce repeated detect() calls.
+      - Progress bars provided by tqdm.
+    """
+    cache: Dict[float, Tuple[float, float, float]] = {}
+
+    # Coarse grid
+    if factors_to_test is None:
+        factors = np.unique(np.logspace(np.log10(coarse_min), np.log10(coarse_max), num=coarse_num))
+    else:
+        factors = np.unique(np.array(list(factors_to_test), dtype=float))
+
+    best_f: Optional[float] = None
+    best_tuple = (-1.0, -1.0, -1.0)  # (P, R, F1)
+
+    print(f"[Threshold Tuning] Coarse search over {len(factors)} candidates...")
+    for f in tqdm(factors, desc="Coarse Search", leave=False):
+        p, r, f1 = _evaluate_metrics(detector_instance, val_data, true_maneuver_times, f, tol_days, cache)
+        if f1 > best_tuple[2]:
+            best_tuple = (p, r, f1)
+            best_f = float(f)
+
+    if best_f is None:
+        best_f = 1.0
+        detector_instance.cfg.threshold_factor = best_f
+        print("[Warning] F1 search failed; falling back to 1.0")
+        return best_f
+
+    # Local refinements
+    for round_id in range(refine_rounds):
+        neigh = np.unique(
+            np.clip(
+                best_f * np.array([0.6, 0.75, 0.85, 0.95, 1.0, 1.05, 1.2, 1.4], dtype=float),
+                coarse_min,
+                coarse_max,
+            )
+        )
+        improved = False
+        print(f"[Threshold Tuning] Refinement round {round_id + 1} over {len(neigh)} candidates...")
+        for f in tqdm(neigh, desc=f"Refine Round {round_id + 1}", leave=False):
+            p, r, f1 = _evaluate_metrics(detector_instance, val_data, true_maneuver_times, f, tol_days, cache)
+            if f1 > best_tuple[2] + 1e-12:
+                best_tuple = (p, r, f1)
+                best_f = float(f)
+                improved = True
+        if not improved:
+            break
+
+    detector_instance.cfg.threshold_factor = best_f
+    print(
+        f"[Threshold Tuning] Best factor for F1: {best_f:.3f} "
+        f"(P={best_tuple[0]:.3f}, R={best_tuple[1]:.3f}, F1={best_tuple[2]:.3f})"
+    )
+    return best_f
+
+
+# ---------- Compatibility wrapper ----------
 def find_factor_for_target_recall(
     detector_instance: EnhancedARIMADetector,
     val_data: pd.Series,
     true_maneuver_times: List[pd.Timestamp],
-    target_recall: float = 0.5,
-    n_trials: int = 50
+    target_recall: float = 0.5,  # kept for signature compatibility; not used
+    lo: float = 0.2,
+    hi: float = 5.0,
+    max_steps: int = 18,
+    tol_days: int = 2,
+    **kwargs,
 ) -> float:
     """
-    寻找能满足目标召回率的最高阈值因子，并显示进度条。
+    Compatibility wrapper: regardless of legacy invocation, redirect to the F1-oriented search.
     """
-    print(f"\n🎯 Optimizing threshold for TARGET RECALL >= {target_recall:.0%}...")
-    
-    factors_to_test = np.linspace(0.2, 5.0, n_trials)
-    valid_factors = []
-    
-    # --- 2. 在循环中加入tqdm进度条 ---
-    # leave=False 表示进度条完成后会消失，保持日志整洁
-    for factor in tqdm(factors_to_test, desc="Optimizing Threshold for Recall", leave=False):
-        temp_detector = copy.deepcopy(detector_instance)
-        temp_detector.cfg.threshold_factor = factor
-
-        results_df = temp_detector.detect(val_data)
-        predicted_times = results_df[results_df['is_anomaly']].index.tolist()
-        
-        tp, fp, fn = _greedy_event_match(predicted_times, true_maneuver_times, timedelta(days=2))
-        
-        current_recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-
-        if current_recall >= target_recall:
-            valid_factors.append(factor)
-            
-    if not valid_factors:
-        print(f"  [Warning] No threshold factor achieved target recall. Falling back to the most sensitive setting.")
-        return factors_to_test[0]
-    else:
-        best_factor = max(valid_factors)
-        print(f"  ✅ Best factor to achieve recall >= {target_recall:.0%} is {best_factor:.2f}")
-        return best_factor
-
-# 同时为旧的F1优化器也加上进度条
-def find_best_threshold_factor(detector_instance, val_data, true_maneuver_times, n_trials=25):
-    """在验证集上优化阈值因子以最大化F1分数。"""
-    print(f"\n🎯 Optimizing threshold factor for MAX F1...")
-    factors_to_test = np.linspace(0.5, 4.0, n_trials)
-    best_f1, best_factor = -1.0, detector_instance.cfg.threshold_factor
-    
-    for factor in tqdm(factors_to_test, desc="Optimizing Threshold for F1", leave=False):
-        temp_detector = copy.deepcopy(detector_instance)
-        temp_detector.cfg.threshold_factor = factor
-        results_df = temp_detector.detect(val_data)
-        predicted_times = results_df[results_df['is_anomaly']].index.tolist()
-        tp, fp, fn = _greedy_event_match(predicted_times, true_maneuver_times, timedelta(days=2))
-        precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-        recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
-        if f1 > best_f1:
-            best_f1, best_factor = f1, factor
-    
-    print(f"✅ Best threshold factor for F1: {best_factor:.2f} (F1: {best_f1:.3f})")
-    return best_factor
+    print("[Threshold Tuning] Using F1-oriented threshold tuning (compat wrapper).")
+    return find_best_threshold_factor(
+        detector_instance, val_data, true_maneuver_times, tol_days=tol_days
+    )
