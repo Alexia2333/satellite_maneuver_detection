@@ -217,26 +217,26 @@ class ManeuverXGBDetector:
         if self.model is None:
             raise RuntimeError("Model is not fitted.")
         
-        # 数据长度验证
+        # Data length verification
         if len(timestamps) < len(X):
             raise ValueError(f"timestamps length ({len(timestamps)}) < X length ({len(X)})")
         
-        # 准备时间序列数据
+        # Data length verification
         ts = pd.to_datetime(timestamps.iloc[-len(X):]).reset_index(drop=True)
         scores = self.predict_scores_from_features(X)
-        s = pd.Series(scores, index=ts).sort_index()  # 确保时间序列有序
+        s = pd.Series(scores, index=ts).sort_index()  # Ensure the time series is in order
         
-        # 计算滑动窗口最大值
+        # Calculate the maximum value of the sliding window
         agg = s.rolling(f"{int(window_days)}D", min_periods=1).max()
 
-        # 检测异常和聚类
+        # Detect anomalies and clusters
         det_df = self.detect_from_features(X, timestamps=ts)
         cluster_centers = (det_df.dropna(subset=['cluster_id'])
                                .sort_values(['cluster_id','score'], ascending=[True, False])
                                .drop_duplicates(subset=['cluster_id']))
         cluster_times = list(cluster_centers['timestamp'])
 
-        # 绘图
+        # Drawing
         half = pd.to_timedelta(window_days, unit='D')
         plt.figure(figsize=(12, 6))
         
@@ -247,11 +247,11 @@ class ManeuverXGBDetector:
         if hasattr(self, 'fitted_threshold_') and self.fitted_threshold_ is not None:
             plt.axhline(self.fitted_threshold_, linestyle=':', alpha=0.8, label='Threshold')
         
-        # 添加机动时间窗口
+        # Add maneuvering time window
         for ev in maneuver_times:
             plt.axvspan(ev - half, ev + half, alpha=0.1, color='red', label='Maneuver Window' if ev == maneuver_times[0] else "")
         
-        # 添加聚类时间线
+        # Add clustering timeline
         for ct in cluster_times:
             plt.axvline(ct, linestyle='--', alpha=0.7, color='green', 
                        label='Cluster Center' if ct == cluster_times[0] else "")
@@ -271,7 +271,7 @@ class ManeuverXGBDetector:
         return {"cluster_times": cluster_times, "window_days": window_days}
 
     def _default_param_grid(self, orbit: str) -> Dict[str, List]:
-        """根据轨道类型返回默认的参数网格"""
+        """Returns the default parameter grid based on the track type."""
         if orbit == "GEO":
             return {
                 "max_depth": [3, 4, 5, 6],
@@ -296,7 +296,7 @@ class ManeuverXGBDetector:
             }
 
     def save_run_artifacts(self, save_dir: str) -> None:
-        """保存运行结果和配置"""
+        """Save the running results and configuration"""
         os.makedirs(save_dir, exist_ok=True)
         
         config_data = {

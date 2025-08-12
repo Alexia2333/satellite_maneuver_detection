@@ -7,10 +7,10 @@ warnings.filterwarnings('ignore', 'statsmodels.tsa.arima.model.ARIMA', UserWarni
 
 class RealTimeARIMADetector:
     """
-    一个为实时、单点异常检测优化的ARIMA检测器。
-    工作流程：
-    1. 用大量历史正常数据进行一次`fit`。
-    2. 对每一个新数据点调用`detect`方法。
+    An ARIMA-based detector optimized for real-time, single-point anomaly detection.
+    Workflow:
+    1. Fit once using a large amount of historical normal data.
+    2. Call the `detect` method for each new incoming data point.
     """
     def __init__(self, p: int = 5, d: int = 1, q: int = 1, threshold_factor: float = 3.0):
         self.p, self.d, self.q = p, d, q
@@ -19,24 +19,25 @@ class RealTimeARIMADetector:
         self.model_fit = None
         self.history = None
         self.residual_std = None
-        self.series_name = None # <--- 新增：用于存储序列名称
+        self.series_name = None # <--- Added: used to store the original series name
 
     def fit(self, history: pd.Series):
         """
-        用历史数据训练ARIMA模型，并建立“正常”残差的基线。
+        Train the ARIMA model with historical data and establish a baseline of
+        'normal' residuals.
         """
         if not isinstance(history.index, pd.DatetimeIndex):
             raise TypeError("Input series for fitting must have a DatetimeIndex.")
             
         print(f"Fitting ARIMA({self.p},{self.d},{self.q}) on {len(history)} historical data points...")
         self.history = history.copy()
-        self.series_name = history.name # <--- 【核心修正1】存储原始序列的名称
+        self.series_name = history.name # <--- [Key Fix 1] Store the original series name
         
-        # 训练模型
+        # Train the model
         model = ARIMA(self.history, order=(self.p, self.d, self.q))
         self.model_fit = model.fit()
         
-        # 计算并存储历史残差的标准差
+        # Calculate and store the standard deviation of historical residuals
         residuals = self.model_fit.resid
         self.residual_std = np.std(residuals)
         
@@ -45,7 +46,7 @@ class RealTimeARIMADetector:
 
     def detect(self, new_observation: float, timestamp) -> Dict:
         """
-        检测一个新数据点是否为异常。
+        Detect whether a new data point is an anomaly.
         """
         if self.model_fit is None:
             raise RuntimeError("Detector has not been fitted. Call .fit() with historical data first.")
@@ -57,7 +58,7 @@ class RealTimeARIMADetector:
         
         is_maneuver = score > self.threshold_factor
         
-        # 【核心修正2】创建新数据点时，使用之前存储的名称
+        # When creating the new data point, use the previously stored series name
         new_data_point = pd.Series([new_observation], index=[timestamp], name=self.series_name)
         self.model_fit = self.model_fit.append(new_data_point, refit=False)
         

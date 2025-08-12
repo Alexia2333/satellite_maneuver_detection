@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
-# 可按你的报告填充
+# You can fill in according to your report
 KNOWN_BEST_PARAMS: Dict[str, Dict[str, Tuple[int, int, int]]] = {
     "jason-1": {"mean_motion": (3, 1, 3), "eccentricity": (2, 1, 1), "inclination": (1, 1, 1)},
     "jason-2": {"mean_motion": (2, 2, 1), "eccentricity": (1, 0, 2), "inclination": (3, 0, 1)},
@@ -21,6 +21,9 @@ KNOWN_BEST_PARAMS: Dict[str, Dict[str, Tuple[int, int, int]]] = {
 
 
 def get_stationarity(y: pd.Series, p_value: float = 0.05, max_d: int = 2) -> int:
+    """
+    Determine the order of differencing (d) needed for stationarity using the ADF test.
+    """
     y = pd.Series(y).astype("float64").dropna()
     d = 0
     cur = y.copy()
@@ -46,6 +49,10 @@ def _find_best_arima_order_impl(
     q_candidates=range(0, 5),
     tail_len: int = 2000,
 ) -> Tuple[int, int, int]:
+    """
+    Internal function to find the best ARIMA(p,d,q) order for a given satellite and element.
+    Uses known parameters if available, otherwise performs a guided search with constraints.
+    """
     s_name_lower = str(satellite_name).strip().lower()
     element_name = str(element_name).strip()
 
@@ -72,7 +79,7 @@ def _find_best_arima_order_impl(
 
     pq_all = list(itertools.product(p_candidates, q_candidates))
     pq_grid = [(p, q) for (p, q) in pq_all if (p + q) <= 4 and not (p == 0 and q == 0)]
-    pq_grid = pq_grid + ([(0, 0)] if (0, 0) not in pq_all else [])  # 让 (0,d,0) 至少被评一次
+    pq_grid = pq_grid + ([(0, 0)] if (0, 0) not in pq_all else [])  # Ensure (0,d,0) is evaluated at least once
 
     best_aic = float("inf")
     best_order = None
@@ -81,7 +88,7 @@ def _find_best_arima_order_impl(
 
     for p, q in tqdm(pq_grid, desc=f"Grid Search (d={d})", leave=False):
         order = (p, d, q)
-        # 两段式：先稳再快
+        # Two-phase: try stable method first, then faster fallback
         tried = False
         try:
             model = ARIMA(
@@ -90,10 +97,10 @@ def _find_best_arima_order_impl(
                 trend=trend_flag,
                 enforce_stationarity=False,
                 enforce_invertibility=False,
-            ).fit()  # 默认 statespace MLE，稳
+            ).fit()  # Default statespace MLE (more stable)
             tried = True
         except Exception:
-            # 若默认失败，d=0 时再用 css 试一次（更快的 ARMA 似然）
+            # If default fails and d=0, try CSS method (faster for ARMA)
             if d == 0:
                 try:
                     model = ARIMA(
@@ -123,10 +130,12 @@ def _find_best_arima_order_impl(
 
 
 def _looks_like_series(x) -> bool:
+    """
+    Check if the input looks like a 1D series (pandas Series, numpy array, or list).
+    """
     if isinstance(x, pd.Series):
         return True
     try:
-        # numpy array / list 也算序列
         arr = np.asarray(x)
         return arr.ndim == 1 and arr.size > 0
     except Exception:
@@ -135,11 +144,12 @@ def _looks_like_series(x) -> bool:
 
 def find_best_arima_order(*args, **kwargs) -> Tuple[int, int, int]:
     """
-    兼容两种签名：
-    1) 旧版：find_best_arima_order(history, satellite_name, element_name, ...)
-    2) 新版：find_best_arima_order(satellite_name, element_name, history, ...)
+    Compatibility function supporting two signatures:
+    1) Old version: find_best_arima_order(history, satellite_name, element_name, ...)
+    2) New version: find_best_arima_order(satellite_name, element_name, history, ...)
 
-    不改主脚本的情况下自动判断并转发到 _find_best_arima_order_impl。
+    Automatically detects the signature and forwards the call to _find_best_arima_order_impl
+    without modifying the main script.
     """
     if len(args) < 3:
         raise TypeError(
@@ -149,12 +159,11 @@ def find_best_arima_order(*args, **kwargs) -> Tuple[int, int, int]:
 
     a0, a1, a2 = args[0], args[1], args[2]
 
-    # 旧签名：第一个参数是时间序列
+    # Old signature: first argument is the time series
     if _looks_like_series(a0):
         history = pd.Series(a0)
         satellite_name = a1
         element_name = a2
-        # 把其余可选参数取出来（如果传了）
         p_candidates = kwargs.get("p_candidates", range(0, 5))
         q_candidates = kwargs.get("q_candidates", range(0, 5))
         tail_len = kwargs.get("tail_len", 2000)
@@ -162,7 +171,7 @@ def find_best_arima_order(*args, **kwargs) -> Tuple[int, int, int]:
             satellite_name, element_name, history, p_candidates, q_candidates, tail_len
         )
 
-    # 新签名：第一个参数是卫星名，第三个是时间序列
+    # New signature: first argument is the satellite name, third is the time series
     satellite_name = a0
     element_name = a1
     history = pd.Series(a2)

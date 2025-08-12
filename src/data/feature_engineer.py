@@ -7,20 +7,15 @@ from scipy import stats
 
 class EnhancedSatelliteFeatureEngineer:
     """
-    一个统一且高性能的卫星特征工程类。
+Usage:
+1. Initialization: `engineer = EnhancedSatelliteFeatureEngineer(...)`
+2. Fitting: `engineer.fit(train_df, satellite_name='...')` (for learning global statistics and satellite type)
+3. Transformation: `features = engineer.transform(df)` (for creating features)
 
-    该类整合了多种特征创建策略，包括基础时序特征、轨道向量特征、
-    针对GEO/LEO卫星的特定特征等，并通过优化的方式构建特征以避免性能问题。
-
-    使用流程:
-    1. 初始化: `engineer = EnhancedSatelliteFeatureEngineer(...)`
-    2. 拟合: `engineer.fit(train_df, satellite_name='...')` (用于学习全局统计量和卫星类型)
-    3. 转换: `features = engineer.transform(df)` (用于创建特征)
-
-    注意：此类不再负责创建'target'列或填充NaN值。
-    这些步骤应在主训练流程中处理，以保持特征工程的通用性。
+Note: This class no longer creates the 'target' column or fills NaN values.
+These steps should be handled in the main training process to maintain the generalizability of feature engineering.
     """
-    # 定义常量以提高可读性和可维护性
+
     EPSILON = 1e-9
     GEO_NAMES = ['fengyun', 'goes', 'meteosat']
     VOLATILITY_BREAKOUT_FACTOR = 1.5
@@ -49,15 +44,15 @@ class EnhancedSatelliteFeatureEngineer:
 
     def fit(self, data: pd.DataFrame, satellite_name: str = None) -> 'EnhancedSatelliteFeatureEngineer':
         """
-        根据输入数据学习全局统计量，并确定卫星类型。
+        Learn global statistics based on input data and determine the satellite type.
         """
         print("Fitting Feature Engineer...")
-        # 1. 确定卫星类型
+        # 1. Determine the satellite type
         if self.satellite_type == 'auto':
             self.satellite_type = self._determine_satellite_type(satellite_name)
         print(f"   -> Determined satellite type: {self.satellite_type}")
 
-        # 2. 计算并存储全局统计量
+        # 2. Calculate and store global statistics
         self.global_stats = {}
         for col in self.base_process_cols:
             if col in data.columns:
@@ -74,39 +69,39 @@ class EnhancedSatelliteFeatureEngineer:
 
     def transform(self, data: pd.DataFrame) -> pd.DataFrame:
         """
-        对输入数据应用所有特征工程步骤。
+        Apply all feature engineering steps to the input data.
         """
         print("Transforming data to create features...")
         features_df = data.copy()
         
-        # 使用列表收集所有新特征的DataFrame，最后统一合并
+        ## Use a list to collect the DataFrame of all new features and finally merge them together
         all_new_features = []
 
-        # 1. 创建轨道向量特征 (e.g., sin/cos of angles)
+
         vector_features_df = self._create_orbital_vector_features(features_df)
         if not vector_features_df.empty:
-            # 更新需要处理的列列表
+
             self._all_process_cols = list(set(self.base_process_cols + vector_features_df.columns.tolist()))
             all_new_features.append(vector_features_df)
         else:
             self._all_process_cols = self.base_process_cols
 
-        # 2. 为每个核心参数创建增强时序特征
+        # Create enhanced timing features for each core parameter
         print(f"   -> Creating enhanced time-series features for {self._all_process_cols}...")
         for col in self._all_process_cols:
             if col in features_df.columns:
                 col_features_df = self._create_enhanced_features_for_col(features_df, col)
                 all_new_features.append(col_features_df)
         
-        # 临时的完整特征DF，用于计算交叉特征
+        # Temporary complete feature DF, used to calculate cross features
         temp_full_df = pd.concat([features_df] + all_new_features, axis=1)
 
-        # 3. 创建交叉元素特征
+        #Creating Intersecting Element Features
         print("   -> Creating cross-element features...")
         cross_features_df = self._create_cross_element_features(temp_full_df)
         all_new_features.append(cross_features_df)
 
-        # 4. 根据卫星类型添加特定特征
+        # Add specific features based on satellite type
         if self.satellite_type == 'GEO':
             print("   -> Adding GEO-specific features...")
             geo_features_df = self._add_geo_specific_features(temp_full_df)
@@ -116,11 +111,11 @@ class EnhancedSatelliteFeatureEngineer:
             leo_features_df = self._add_leo_specific_features(temp_full_df)
             all_new_features.append(leo_features_df)
 
-        # 5. 最终合并所有特征
+        # Finally, all features are merged
         print("   -> Finalizing feature set.")
         final_df = pd.concat([features_df] + all_new_features, axis=1)
         
-        # 移除重复列
+        # Remove Duplicate Columns
         final_df = final_df.loc[:, ~final_df.columns.duplicated()]
 
         print(f"✅ Feature engineering complete. Final shape: {final_df.shape}")
@@ -132,18 +127,18 @@ class EnhancedSatelliteFeatureEngineer:
         return 'LEO'
 
     def _create_enhanced_features_for_col(self, df: pd.DataFrame, col_name: str) -> pd.DataFrame:
-        """为单个列创建所有时序特征，返回一个仅包含新特征的DataFrame。"""
+        """Create all time series features for a single column, returning a DataFrame containing only the new features."""
         new_cols = {}
         
-        # 差分特征
+        # Differential features
         for n in [1, 2, 7]:
             new_cols[f'{col_name}_diff_{n}'] = df[col_name].diff(n)
 
-        # 滞后特征
+        # Hysteresis characteristics
         for lag in self.lag_features:
             new_cols[f'{col_name}_lag_{lag}'] = df[col_name].shift(lag)
 
-        # 滚动统计特征
+        # Rolling statistical features
         for window in self.rolling_windows:
             rolling = df[col_name].rolling(window=window, min_periods=1)
             mean = rolling.mean()
@@ -152,7 +147,7 @@ class EnhancedSatelliteFeatureEngineer:
             new_cols[f'{col_name}_rolling_std_{window}'] = std
             new_cols[f'{col_name}_rolling_cv_{window}'] = std / (mean + self.EPSILON)
         
-        # 趋势、波动性和相对位置特征
+        # Trend, Volatility, and Relative Position Characteristics
         new_cols.update(self._calculate_trend_features(df, col_name))
         new_cols.update(self._calculate_volatility_features(df, col_name, new_cols))
         new_cols.update(self._calculate_relative_position_features(df, col_name))
@@ -160,7 +155,7 @@ class EnhancedSatelliteFeatureEngineer:
         return pd.DataFrame(new_cols, index=df.index)
 
     def _calculate_trend_features(self, df: pd.DataFrame, col_name: str) -> Dict[str, pd.Series]:
-        """计算趋势特征。"""
+        """Calculate trend characteristics."""
         trend_cols = {}
         for window in self.trend_windows:
             def trend_slope(x):
@@ -171,12 +166,12 @@ class EnhancedSatelliteFeatureEngineer:
         return trend_cols
 
     def _calculate_volatility_features(self, df: pd.DataFrame, col_name: str, existing_new_cols: Dict) -> Dict[str, pd.Series]:
-        """计算波动性特征。"""
+        """Calculate volatility characteristics."""
         vol_cols = {}
         std_7_col = f'{col_name}_rolling_std_7'
         std_30_col = f'{col_name}_rolling_std_30'
         
-        # 确保依赖的列已经计算
+        # Make sure the dependent columns are calculated
         series_std_7 = existing_new_cols.get(std_7_col)
         series_std_30 = existing_new_cols.get(std_30_col)
         
@@ -186,7 +181,7 @@ class EnhancedSatelliteFeatureEngineer:
         return vol_cols
 
     def _calculate_relative_position_features(self, df: pd.DataFrame, col_name: str) -> Dict[str, pd.Series]:
-        """计算相对位置特征。"""
+        """Calculate relative position features."""
         pos_cols = {}
         if col_name in self.global_stats:
             stats_dict = self.global_stats[col_name]
@@ -197,7 +192,7 @@ class EnhancedSatelliteFeatureEngineer:
         return pos_cols
         
     def _create_cross_element_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """创建交叉元素特征。"""
+        """Creates a cross element feature."""
         new_cols = {}
         if 'mean_motion' in df.columns and 'eccentricity' in df.columns:
             new_cols['mm_div_ecc'] = df['mean_motion'] / (df['eccentricity'] + self.EPSILON)
@@ -212,7 +207,7 @@ class EnhancedSatelliteFeatureEngineer:
         return pd.DataFrame(new_cols, index=df.index)
 
     def _add_geo_specific_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """为GEO卫星添加漂移和压力特征。"""
+        """Add drift and pressure features for GEO satellites."""
         new_cols = {}
         long_window = 60
         short_window = 14
@@ -232,7 +227,7 @@ class EnhancedSatelliteFeatureEngineer:
         return pd.DataFrame(new_cols, index=df.index)
 
     def _add_leo_specific_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """为LEO卫星添加急剧变化和事件历史特征。"""
+        """Adds sharp change and event history features for LEO satellites."""
         new_cols = {}
         for col in self.base_process_cols:
             if col not in df.columns: continue
@@ -245,12 +240,12 @@ class EnhancedSatelliteFeatureEngineer:
                 new_cols[f'{col}_sharp_change'] = sharp_change
                 new_cols[f'{col}_consecutive_sharp_change_3d'] = sharp_change.rolling(3).sum()
 
-            # 计算自上次跳变以来的天数
+            # Calculate the number of days since the last jump
             col_diff_abs = df[col].diff().abs()
             jump_threshold = col_diff_abs.quantile(self.JUMP_DETECTION_QUANTILE)
             events = (col_diff_abs > jump_threshold).astype(int)
             
-            # 找到每次事件的索引
+            # Find the index of each event
             event_indices = pd.Series(np.arange(len(df)), index=df.index)
             event_indices[events == 0] = np.nan
             event_indices = event_indices.ffill()
@@ -260,7 +255,7 @@ class EnhancedSatelliteFeatureEngineer:
         return pd.DataFrame(new_cols, index=df.index)
 
     def _create_orbital_vector_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """创建轨道向量特征 (sin/cos)，以处理角度周期性。"""
+        """Create an Orbital Vector feature (sin/cos) to handle angular periodicity."""
         new_cols = {}
         angle_cols = { "inclination": "inclination", "raan": "raan", "argp": "argument_perigee", "M": "mean_anomaly" }
         

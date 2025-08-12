@@ -10,9 +10,8 @@ import warnings
 
 class SatelliteDataLoader:
     """
-    [最终修正版] 加载卫星 TLE 和机动数据。
-    - 修复了 TLE epoch 列的加载问题。
-    - 包含智能分派器以解析多种不同的机动文件格式。
+  - Fixed loading issues with the TLE epoch column.
+  - Included smart dispatchers to parse multiple different motor file formats.
     """
     
     def __init__(self, data_dir: str = "data"):
@@ -56,9 +55,9 @@ class SatelliteDataLoader:
                 if tle_data[col].isna().any():
                     warnings.warn(f"      - Column '{col}' has NaNs after coercion.")
         
-        # --- 【核心修正】恢复 epoch 列的备用处理逻辑 ---
+
         if 'epoch' not in tle_data.columns and not tle_data.empty:
-            # 如果没有 'epoch' 列，则假定第一列是 epoch
+            # If there is no 'epoch' column, the first column is assumed to be epoch
             first_col_name = tle_data.columns[0]
             tle_data = tle_data.rename(columns={first_col_name: 'epoch'})
             warnings.warn(f"      - 'epoch' column not found. Assuming first column ('{first_col_name}') is the epoch.")
@@ -67,7 +66,7 @@ class SatelliteDataLoader:
         if 'epoch' in tle_data.columns:
             tle_data['epoch'] = pd.to_datetime(tle_data['epoch'])
         else:
-            # 如果经过备用逻辑处理后仍然没有 epoch 列，则抛出错误
+            # If there is still no epoch column after the backup logic is processed, an error is thrown
             raise ValueError("Epoch column not found.")
 
         return tle_data.sort_values('epoch').reset_index(drop=True)

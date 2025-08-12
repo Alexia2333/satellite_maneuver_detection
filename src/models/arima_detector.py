@@ -11,7 +11,6 @@ warnings.filterwarnings('ignore')
 
 @dataclass
 class DetectorConfig:
-    """配置类，用于管理检测器的所有参数"""
     order: Tuple[int, int, int] = (5, 1, 1)
     window_size: int = 50
     threshold_factor: float = 3.0
@@ -19,12 +18,11 @@ class DetectorConfig:
     fallback_orders: List[Tuple[int, int, int]] = field(default_factory=lambda: [
         (5, 1, 1), (3, 1, 1), (1, 1, 1), (1, 1, 0)
     ])
-    # --- 新增：漂移感知相关参数 ---
-    use_drift_awareness: bool = True       # 是否启用漂移感知功能
-    drift_long_window: int = 30            # 用于计算长期“正常”中心的窗口
-    drift_short_window: int = 14           # 用于计算累积漂移压力的窗口
-    pressure_reduction_factor: float = 0.4 # 漂移压力对阈值的最大削减程度(例如0.4代表最多降低40%)
-    min_adjustment_factor: float = 0.5     # 阈值调整因子的下限，防止阈值过低
+    use_drift_awareness: bool = True       # Whether to enable the drift detection function
+    drift_long_window: int = 30            # Window used to calculate the long-term "normal" center
+    drift_short_window: int = 14           # Window for calculating accumulated drift pressure
+    pressure_reduction_factor: float = 0.4 # The maximum reduction in the threshold value caused by drift pressure (e.g. 0.4 means a maximum reduction of 40%)
+    min_adjustment_factor: float = 0.5     # The lower limit of the value adjustment factor to prevent the threshold from being too low低
 
 class EnhancedARIMADetector:
     def __init__(self, config: Optional[DetectorConfig] = None):
@@ -32,24 +30,23 @@ class EnhancedARIMADetector:
         self.scaler = StandardScaler()
         self.train_series: Optional[pd.Series] = None
         self.baseline_resid_std: float = 1.0
-        # --- 新增：用于标准化漂移压力的基线值 ---
+        # --- Baseline for normalizing drift pressure ---
         self.pressure_baseline: float = 1.0
 
     def fit(self, train_series: pd.Series) -> "EnhancedARIMADetector":
         """
-        '训练'检测器，现在也包括计算漂移压力的基线。
+        'Training the detector now also includes calculating the baseline for drift pressure.
         """
         if train_series.empty:
             raise ValueError("Training data cannot be empty.")
         self.train_series = train_series.copy()
         self.scaler.fit(self.train_series.values.reshape(-1, 1))
         
-        # --- 新增：在训练集上计算漂移压力基线 ---
         if self.cfg.use_drift_awareness:
             scaled_train_vals = self.scaler.transform(self.train_series.values.reshape(-1, 1)).flatten()
             short_term_drift = pd.Series(scaled_train_vals).diff().abs()
             cumulative_drift = short_term_drift.rolling(window=self.cfg.drift_short_window).sum().fillna(0)
-            # 使用75分位数作为“高压力”的基准，这比均值更稳健
+            # Use the 75th percentile as a benchmark for "high stress," which is more robust than the mean.
             self.pressure_baseline = np.quantile(cumulative_drift[cumulative_drift > 0], 0.75)
             print(f"  Drift-Awareness enabled. Pressure baseline calculated: {self.pressure_baseline:.4f}")
         
@@ -83,13 +80,13 @@ class EnhancedARIMADetector:
         scaled_values = self.scaler.transform(full_series.values.reshape(-1, 1)).flatten()
         scaled_series = pd.Series(scaled_values, index=full_series.index)
         
-        # --- 新增：预先计算整个序列的漂移压力和调整因子 ---
-        adjustment_factors = pd.Series(1.0, index=full_series.index) # 默认调整因子为1.0
+        # --- Pre-calculate drift pressure and adjustment factors for the entire sequence ---
+        adjustment_factors = pd.Series(1.0, index=full_series.index) 
         if self.cfg.use_drift_awareness and self.pressure_baseline > 0:
             short_term_drift = scaled_series.diff().abs()
             cumulative_drift = short_term_drift.rolling(window=self.cfg.drift_short_window).sum().fillna(0)
             
-            # 类似您文档中的逻辑：压力越大，调整因子越小
+            # The greater the pressure, the smaller the adjustment factor
             normalized_pressure = cumulative_drift / self.pressure_baseline
             factor_reduction = self.cfg.pressure_reduction_factor * np.clip(normalized_pressure - 1.0, a_min=0, a_max=None)
             adjustment_factors = 1.0 - factor_reduction
@@ -117,7 +114,7 @@ class EnhancedARIMADetector:
                 threshold_base = max(local_resid_std, 0.5 * self.baseline_resid_std)
                 threshold = threshold_base * self.cfg.threshold_factor
 
-            # --- 新增：应用漂移感知调整因子 ---
+            # Applying drift-aware adjustment factors
             adjustment_factor = adjustment_factors.iloc[i]
             final_threshold = threshold * adjustment_factor
 
