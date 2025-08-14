@@ -20,7 +20,7 @@ from src.tuning.tune_arima_threshold import find_factor_for_target_recall
 from src.utils.metrics import evaluate_detection
 
 ELEMENTS_TO_PROCESS = ['mean_motion', 'eccentricity', 'inclination']
-TARGET_RECALL_LEVEL = 0.4 # 设定一个40%的召回率目标
+TARGET_RECALL_LEVEL = 0.4 
 
 def prepare_time_series(tle_df: pd.DataFrame, element: str) -> pd.Series:
     if element not in tle_df.columns:
@@ -76,6 +76,7 @@ def main():
     tle_data, maneuver_times = loader.load_satellite_data(args.satellite)
     
     all_results = {}
+    individual_element_performance = []
 
     for element in ELEMENTS_TO_PROCESS:
         print(f"\n--- Processing Element: {element} ---")
@@ -104,6 +105,17 @@ def main():
 
         results_df = detector.detect(test_data)
         all_results[element] = results_df[['actual', 'score', 'is_anomaly']]
+        
+        print(f"  Evaluating performance for single element: {element}")
+        element_detections = results_df[results_df['is_anomaly']].index.tolist()
+        test_maneuvers_element = [m for m in maneuver_times if test_data.index.min() <= m <= test_data.index.max()]
+        
+        element_metrics, _ = evaluate_detection(element_detections, test_maneuvers_element, timedelta(days=2))
+        
+        element_metrics['element'] = element
+        individual_element_performance.append(element_metrics)
+        
+        print(f"  -> Single Element Performance (F1: {element_metrics['f1']:.3f}, P: {element_metrics['precision']:.2%}, R: {element_metrics['recall']:.2%})")
     
     if len(all_results) < 2:
         print("\n❌ Not enough elements processed for fusion. Exiting.")
@@ -137,16 +149,33 @@ def main():
     plot_path = output_dir / "fusion_detection_plot.png"
     visualize_fusion_results(fusion_df, test_maneuvers, plot_title, plot_path)
     
-    # --- MODIFICATION START ---
-    # Save the full DataFrame used for plotting to a CSV file.
-    # This allows for later re-plotting and detailed analysis without re-running the model.
-    plot_data_path = output_dir / 'fusion_plot_data.csv'
-    fusion_df.to_csv(plot_data_path)
-    print(f"saved plotting data to {plot_data_path}")
+    print(f"Plotting data CSV generation is skipped to save space.")
+    
+    # 1. Prepare the main report for the fusion results.
+    report = {
+        "satellite_name": args.satellite, 
+        "fusion_method": "Weighted Fusion", 
+        "weights": weights, 
+        "performance": metrics, 
+        "target_recall_for_tuning": TARGET_RECALL_LEVEL
+    }
+    
+    # 2. Save the main fusion report to JSON.
+    with open(output_dir / 'fusion_summary_report.json', 'w') as f:
+        json.dump(report, f, indent=2, default=str)
+    
+    # 3. Save the individual element performance data to a separate, simple JSON file as requested.
+    individual_perf_path_json = output_dir / 'individual_element_performance.json'
+    with open(individual_perf_path_json, 'w') as f:
+        json.dump(individual_element_performance, f, indent=2, default=str)
+    print(f"Saved individual element performance to {individual_perf_path_json}")
+    
+    # 4. Also save to CSV for easy viewing.
+    individual_perf_df = pd.DataFrame(individual_element_performance)
+    individual_perf_path_csv = output_dir / 'individual_element_performance.csv'
+    individual_perf_df.to_csv(individual_perf_path_csv, index=False)
+    print(f"Saved individual element performance to {individual_perf_path_csv}")
     # --- MODIFICATION END ---
-
-    report = {"satellite_name": args.satellite, "fusion_method": "Weighted Fusion", "weights": weights, "performance": metrics, "target_recall_for_tuning": TARGET_RECALL_LEVEL}
-    with open(output_dir / 'fusion_summary_report.json', 'w') as f: json.dump(report, f, indent=2, default=str)
     
     print(f"\n✅ Fusion results saved to {output_dir}")
 
