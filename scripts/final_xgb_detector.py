@@ -12,7 +12,6 @@ from typing import Dict, List, Tuple
 import warnings
 warnings.filterwarnings('ignore')
 
-# Add project root to path
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -44,19 +43,19 @@ class FinalXGBDetector:
         self.evaluation_results = {}
         self.data_stats = {}
         
-        print(f"🛰️ Initializing Final XGB Detector for {satellite_name}")
-        print(f"📁 Output directory: {self.output_dir}")
+        print(f" Initializing Final XGB Detector for {satellite_name}")
+        print(f" Output directory: {self.output_dir}")
     
     def load_and_prepare_data(self) -> Tuple[pd.DataFrame, np.ndarray, pd.Series, List]:
         print("\n" + "="*60)
-        print("📊 DATA LOADING AND PREPARATION")
+        print(" DATA LOADING AND PREPARATION")
         print("="*60)
         
         loader = SatelliteDataLoader(data_dir="data")
         tle_df, maneuver_times = loader.load_satellite_data(self.satellite_name)
         tle_df = tle_df.sort_values("epoch").reset_index(drop=True)
         
-        print(f"✅ Loaded {len(tle_df)} TLE records and {len(maneuver_times)} maneuvers")
+        print(f" Loaded {len(tle_df)} TLE records and {len(maneuver_times)} maneuvers")
         
         config_path = Path("configs") / f"{self.satellite_name}.json"
         orbit = "auto"
@@ -68,7 +67,7 @@ class FinalXGBDetector:
                 orbit = sat_config.get("orbit", "auto")
                 label_window_days = sat_config.get("label_window_days", 2)
         
-        print("\n🔧 Engineering features...")
+        print("\n Engineering features...")
         eng = EnhancedSatelliteFeatureEngineer(
             target_column="mean_motion",
             additional_columns=["eccentricity", "inclination"],
@@ -92,7 +91,7 @@ class FinalXGBDetector:
             "label_window_days": label_window_days, "orbit_type": orbit
         }
         
-        print(f"\n📊 Data Statistics:")
+        print(f"\n Data Statistics:")
         for key, val in self.data_stats.items():
             print(f"  • {key.replace('_', ' ').title()}: {val:.1f}%" if "ratio" in key else f"  • {key.replace('_', ' ').title()}: {val}")
         
@@ -109,7 +108,7 @@ class FinalXGBDetector:
     
     def auto_tune_hyperparameters(self, X, y, orbit="GEO") -> Dict:
         print("\n" + "="*60)
-        print("🔧 HYPERPARAMETER TUNING")
+        print(" HYPERPARAMETER TUNING")
         print("="*60)
         
         param_grid = {
@@ -126,7 +125,7 @@ class FinalXGBDetector:
             early_stopping_rounds=30, random_state=42, maximize="f1"
         )
         
-        print(f"\n✅ Tuning complete!")
+        print(f"\n Tuning complete!")
         print(f"  • Best F1 score: {best_f1:.4f}")
         print(f"  • Best threshold: {best_threshold:.4f}")
         
@@ -139,7 +138,7 @@ class FinalXGBDetector:
     
     def train_detector(self, X, y, timestamps, maneuver_times, best_params=None):
         print("\n" + "="*60)
-        print("🎯 TRAINING DETECTOR")
+        print(" TRAINING DETECTOR")
         print("="*60)
         
         self.config = EnhancedDetectorConfig(
@@ -154,7 +153,7 @@ class FinalXGBDetector:
             self.detector.hyperparams = best_params
         
         val_start = int(0.8 * len(X))
-        print(f"\n📊 Training with {val_start} samples and validating on {len(X)-val_start} samples...")
+        print(f"\n Training with {val_start} samples and validating on {len(X)-val_start} samples...")
         
         self.detector.fit_from_features(X, y, orbit=self.config.orbit, val_start=val_start)
         
@@ -163,12 +162,12 @@ class FinalXGBDetector:
             "final_threshold": float(self.detector.fitted_threshold_)
         }
         
-        print(f"✅ Training complete! Final threshold: {self.detector.fitted_threshold_:.4f}")
+        print(f" Training complete! Final threshold: {self.detector.fitted_threshold_:.4f}")
         return val_start
     
     def evaluate_model(self, X, y, timestamps, maneuver_times, val_start):
         print("\n" + "="*60)
-        print("📈 MODEL EVALUATION")
+        print(" MODEL EVALUATION")
         print("="*60)
         
         scores = self.detector.predict_scores_from_features(X)
@@ -191,7 +190,7 @@ class FinalXGBDetector:
             }
         }
         
-        print(f"\n📊 Performance Summary:")
+        print(f"\n Performance Summary:")
         print(f"  Recall: {eval_results['recall']:.1%}, Precision: {eval_results['precision']:.1%}, F1: {eval_results['f1']:.3f}")
         print(f"  ROC AUC: {roc_auc:.3f}, PR AUC: {pr_auc:.3f}")
         
@@ -199,7 +198,7 @@ class FinalXGBDetector:
     
     def create_visualizations(self, X, timestamps, detections_df, eval_results):
         print("\n" + "="*60)
-        print("🎨 CREATING VISUALIZATIONS")
+        print(" CREATING VISUALIZATIONS")
         print("="*60)
         
         scores = self.detector.predict_scores_from_features(X)
@@ -209,10 +208,16 @@ class FinalXGBDetector:
         ax1.plot(timestamps, scores, linewidth=0.8, alpha=0.7, color='blue', label='Anomaly Score')
         ax1.axhline(self.detector.fitted_threshold_, color='red', linestyle='--', alpha=0.5, label=f'Threshold ({self.detector.fitted_threshold_:.3f})')
         
+        initial_detections = detections_df[detections_df['pred'] == 1]
+        ax1.scatter(initial_detections['timestamp'], initial_detections['score'], 
+                    color='red', marker='x', s=100, zorder=5, label='Initial Detection')
+
         clusters = detections_df.dropna(subset=['cluster_id'])
         if not clusters.empty:
             best_detections = clusters.loc[clusters.groupby('cluster_id')['score'].idxmax()]
-            ax1.scatter(best_detections['timestamp'], best_detections['score'], color='red', s=100, zorder=5, label='Detected Maneuver')
+            ax1.scatter(best_detections['timestamp'], best_detections['score'], 
+                        edgecolor='green', facecolor='none', marker='o', s=200, linewidth=2, 
+                        label='Final Clustered Event', zorder=10)
         
         ax1.set_ylabel('Anomaly Score')
         ax1.set_title(f'{self.satellite_name} - XGBoost Detection Results (F1: {eval_results["f1"]:.3f})')
@@ -238,15 +243,13 @@ class FinalXGBDetector:
         plt.savefig(self.output_dir / 'detection_plot.png', dpi=200)
         plt.close()
         
-        print(f"✅ Visualizations saved to {self.output_dir}")
+        print(f" Visualizations saved to {self.output_dir}")
     
     def save_all_results(self, X, timestamps, detections_df):
         print("\n" + "="*60)
-        print("💾 SAVING RESULTS")
+        print(" SAVING RESULTS")
         print("="*60)
         
-        # --- MODIFICATION START ---
-        # 1. Save the full scores timeline for easier replotting
         scores = self.detector.predict_scores_from_features(X)
         scores_df = pd.DataFrame({
             'timestamp': timestamps,
@@ -254,12 +257,9 @@ class FinalXGBDetector:
         })
         scores_df.to_csv(self.output_dir / 'scores_timeline.csv', index=False)
         print(f"Saved scores timeline to scores_timeline.csv")
-        # --- MODIFICATION END ---
 
-        # 2. Save detection results with cluster info
         detections_df.to_csv(self.output_dir / 'detections.csv', index=False)
-        
-        # 3. Save comprehensive results JSON
+
         results = {
             "metadata": {"satellite": self.satellite_name, "timestamp": self.timestamp},
             "data_statistics": self.data_stats,
@@ -271,11 +271,11 @@ class FinalXGBDetector:
         with open(self.output_dir / 'results.json', 'w', encoding="utf-8") as f:
             json.dump(results, f, indent=2, default=str)
         
-        # 4. Save model
+
         model_path = self.output_dir / 'model.json'
         self.detector.save_model(str(model_path))
         
-        print(f"✅ All results saved to {self.output_dir}")
+        print(f" All results saved to {self.output_dir}")
 
     def run(self, auto_tune=True):
         print("\n" + "="*70)
@@ -290,11 +290,11 @@ class FinalXGBDetector:
             self.create_visualizations(X, timestamps, detections_df, eval_results)
             self.save_all_results(X, timestamps, detections_df)
             
-            print(f"\n✅ DETECTION COMPLETE FOR {self.satellite_name}")
+            print(f"\n DETECTION COMPLETE FOR {self.satellite_name}")
             return True
             
         except Exception as e:
-            print(f"\n❌ Error during detection: {str(e)}")
+            print(f"\n Error during detection: {str(e)}")
             import traceback
             traceback.print_exc()
             return False
@@ -307,7 +307,7 @@ def main():
     
     satellite_name = args.satellite or input("Enter satellite name (e.g., Fengyun-4A): ").strip()
     if not satellite_name:
-        print("❌ Satellite name is required!")
+        print(" Satellite name is required!")
         return
     
     detector = FinalXGBDetector(satellite_name=satellite_name)
@@ -316,7 +316,7 @@ def main():
     if success:
         print(f"\n✨ Success! Check {detector.output_dir} for results.")
     else:
-        print("\n❌ Detection failed. Check the error messages above.")
+        print("\n Detection failed. Check the error messages above.")
 
 if __name__ == "__main__":
     main()

@@ -3,7 +3,7 @@ import subprocess
 import sys
 import os
 from pathlib import Path
-from tqdm import tqdm # 导入tqdm库
+from tqdm import tqdm 
 
 # Ensure the script can find other modules in the project
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,8 +96,6 @@ def main():
             run_experiment(exp['model'], exp['script'], exp['satellite'])
             
             print(f"{'='*25} COMPLETED: {exp['model']} on {exp['satellite']} {'='*25}")
-
-            # Update the progress bar
             pbar.update(1)
 
     print("\n\nAll experiments completed!")
