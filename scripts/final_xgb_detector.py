@@ -240,7 +240,9 @@ class FinalXGBDetector:
         ax2.grid(True, axis='x', alpha=0.3)
         
         plt.tight_layout()
-        plt.savefig(self.output_dir / 'detection_plot.png', dpi=200)
+        # MODIFIED: Filename changed
+        sat_name_clean = self.satellite_name.replace(' ', '_')
+        plt.savefig(self.output_dir / f'{sat_name_clean}_detection_plot.png', dpi=200)
         plt.close()
         
         print(f" Visualizations saved to {self.output_dir}")
@@ -249,16 +251,22 @@ class FinalXGBDetector:
         print("\n" + "="*60)
         print(" SAVING RESULTS")
         print("="*60)
+
+        sat_name_clean = self.satellite_name.replace(' ', '_')
         
         scores = self.detector.predict_scores_from_features(X)
         scores_df = pd.DataFrame({
             'timestamp': timestamps,
             'score': scores
         })
-        scores_df.to_csv(self.output_dir / 'scores_timeline.csv', index=False)
-        print(f"Saved scores timeline to scores_timeline.csv")
+        # MODIFIED: Filename changed
+        scores_df.to_csv(self.output_dir / f'{sat_name_clean}_scores_timeline.csv', index=False)
+        print(f"Saved scores timeline to {sat_name_clean}_scores_timeline.csv")
 
-        detections_df.to_csv(self.output_dir / 'detections.csv', index=False)
+        # MODIFIED: Filename changed
+        detections_df.to_csv(self.output_dir / f'{sat_name_clean}_detections.csv', index=False)
+        print(f"Saved detections to {sat_name_clean}_detections.csv")
+
 
         results = {
             "metadata": {"satellite": self.satellite_name, "timestamp": self.timestamp},
@@ -268,11 +276,12 @@ class FinalXGBDetector:
             "configuration": self.config.__dict__ if self.config else {}
         }
         
-        with open(self.output_dir / 'results.json', 'w', encoding="utf-8") as f:
+        # MODIFIED: Filename changed
+        with open(self.output_dir / f'{sat_name_clean}_results.json', 'w', encoding="utf-8") as f:
             json.dump(results, f, indent=2, default=str)
         
-
-        model_path = self.output_dir / 'model.json'
+        # MODIFIED: Filename changed
+        model_path = self.output_dir / f'{sat_name_clean}_model.json'
         self.detector.save_model(str(model_path))
         
         print(f" All results saved to {self.output_dir}")

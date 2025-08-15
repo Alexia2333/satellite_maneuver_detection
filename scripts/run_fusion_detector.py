@@ -9,6 +9,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Add sklearn imports for PR curve
+from sklearn.metrics import precision_recall_curve, average_precision_score
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -76,7 +79,9 @@ def main():
     parser.add_argument("satellite", help="Satellite name")
     args = parser.parse_args()
 
-    output_dir = Path("outputs") / f"{args.satellite.replace(' ', '_')}_Arima_Fusion_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    # Sanitize satellite name for filenames
+    sat_name_clean = args.satellite.replace(' ', '_')
+    output_dir = Path("outputs") / f"{sat_name_clean}_Arima_Fusion_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     output_dir.mkdir(parents=True, exist_ok=True)
     
     print(f"\n{'='*60}\n  Fusion Pipeline for: {args.satellite}\n{'='*60}")
@@ -170,8 +175,23 @@ def main():
     print(f"\n📊 FINAL FUSION PERFORMANCE:")
     print(f"  F1: {metrics['f1']:.3f}, P: {metrics['precision']:.2%}, R: {metrics['recall']:.2%}")
 
+    # --- ADDED: PR CURVE CALCULATION ---
+    label_window = timedelta(days=2)
+    y_true = pd.Series(0, index=fusion_df.index, dtype=int)
+    for m_time in test_maneuvers:
+        start = m_time - label_window
+        end = m_time + label_window
+        y_true[(y_true.index >= start) & (y_true.index <= end)] = 1
+    
+    y_scores = fusion_df['fused_score'].fillna(0)
+    precision, recall, _ = precision_recall_curve(y_true, y_scores)
+    pr_auc = average_precision_score(y_true, y_scores)
+    print(f"  PR AUC: {pr_auc:.3f}")
+    # --- END ADDITION ---
+
     plot_title = f"Multi-Element Fusion Detection for {args.satellite}"
-    plot_path = output_dir / "fusion_detection_plot.png"
+    # MODIFIED: Filename changed
+    plot_path = output_dir / f"{sat_name_clean}_fusion_detection_plot.png"
     visualize_fusion_results(fusion_df, test_maneuvers, plot_title, plot_path)
     
     summary_report = {
@@ -186,6 +206,14 @@ def main():
             "target_recall_for_tuning": TARGET_RECALL_LEVEL
         },
         "fusion_performance": metrics,
+        # ADDED: PR curve data to report
+        "curves": {
+            "pr": {
+                "precision": precision.tolist(),
+                "recall": recall.tolist(),
+                "auc": float(pr_auc)
+            }
+        },
         "individual_element_performance": individual_element_performance_list
     }
 
@@ -199,19 +227,22 @@ def main():
         "individual_element_events": individual_element_events
     }
 
-    summary_report_path = output_dir / 'arima_fusion_report.json'
+    # MODIFIED: Filename changed
+    summary_report_path = output_dir / f'{sat_name_clean}_arima_fusion_report.json'
     with open(summary_report_path, 'w') as f:
         json.dump(summary_report, f, indent=2, default=str)
     print(f"Saved comprehensive ARIMA summary report to {summary_report_path}")
 
-    events_report_path = output_dir / 'arima_fusion_events.json'
+    # MODIFIED: Filename changed
+    events_report_path = output_dir / f'{sat_name_clean}_arima_fusion_events.json'
     with open(events_report_path, 'w') as f:
         json.dump(events_report, f, indent=2, default=str)
     print(f"Saved detailed event data to {events_report_path}")
     
     if individual_element_performance_list:
         individual_perf_df = pd.DataFrame(individual_element_performance_list)
-        individual_perf_path_csv = output_dir / 'individual_element_performance.csv'
+        # MODIFIED: Filename changed
+        individual_perf_path_csv = output_dir / f'{sat_name_clean}_individual_element_performance.csv'
         individual_perf_df.to_csv(individual_perf_path_csv, index=False)
         print(f"Saved individual element performance to {individual_perf_path_csv}")
     
